@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Speed Limiter for Google Chrome™",
-  "version": "1.0.6",
+  "version": "1.0.6.1",
   "description": "Set a shared download bandwidth limit for Google Chrome™. Free Windows companion required; no accounts or tracking.",
   "permissions": [
     "proxy",
@@ -34,5 +34,6 @@
   "host_permissions": [
     "<all_urls>"
   ],
-  "incognito": "not_allowed"
+  "incognito": "not_allowed",
+  "homepage_url": "https://unwrittenbyte.com/speed-limiter.html"
 }
