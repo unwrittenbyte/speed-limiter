@@ -1,0 +1,20 @@
+# Generated Windows binaries and resource objects
+*.exe
+*.syso
+*.zip
+/dist/
+
+# Local build and signing material
+*.pfx
+*.p12
+*.pem
+*.key
+.env
+.env.*
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+__pycache__/
