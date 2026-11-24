@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Speed Limiter for Google Chrome™",
+  "version": "1.0.6",
+  "description": "Set a shared download bandwidth limit for Google Chrome™. Free Windows companion required; no accounts or tracking.",
+  "permissions": [
+    "proxy",
+    "storage",
+    "nativeMessaging",
+    "alarms",
+    "webRequest",
+    "webRequestAuthProvider"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Speed Limiter",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "minimum_chrome_version": "120",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "incognito": "not_allowed"
+}

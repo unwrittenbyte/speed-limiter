@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speed Limiter</title>
+<style>
+  :root { color-scheme: light; font-family: "Segoe UI", system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  body { width: 370px; margin: 0; padding: 19px 19px 17px; background: #fff; color: #1d2735; font-size: 13px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .brand { display:flex; align-items:center; gap:9px; min-width: 0; }
+  .brand svg { flex: 0 0 auto; color:#196cd5; }
+  h1 { font-size: 15px; font-weight: 750; margin: 0; letter-spacing: -.3px; white-space: nowrap; }
+  .badge { display: inline-flex; gap: 5px; align-items: center; font-size: 11px; font-weight: 650; padding: 5px 8px; border-radius: 999px; white-space: nowrap; color: #247044; background:#e7f7ed; }
+  .badge::before { content:""; width: 6px; height: 6px; border-radius: 50%; background:currentColor; }
+  .badge.offline { color:#9b5921; background:#fff2de; }
+  .badge.paused { color:#657184; background:#eff2f6; }
+  .badge.error { color:#ae3b43; background:#fff0f0; }
+  .divider { height:1px; background: #e8edf2; margin: 16px 0; }
+  .metric-label { font-size: 12px; color: #657184; font-weight:500; }
+  .metric { font-size: 28px; font-weight: 750; letter-spacing: -1.1px; line-height:1.2; margin: 5px 0 7px; font-variant-numeric: tabular-nums; }
+  .metric-note { display: flex; align-items:center; color:#768293; font-size:11.5px; min-height: 16px; }
+  .rate { display:flex; align-items:center; justify-content: space-between; gap:12px; background: #f6f8fb; border-radius:9px; padding: 10px 12px; margin-top:13px; font-size:12px; }
+  .connection-row { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px; padding:9px 11px; border:1px solid #dce4ed; border-radius:8px; background:#f8fafc; }
+  .connection-row strong { font-size:12px; }
+  #vpnStatus { font-weight:700; font-size:11.5px; color:#53657b; white-space:nowrap; }
+  #vpnStatus.on { color:#196bd5; }
+  .vpn-note { margin:5px 0 0; font-size:11px; line-height:1.35; color:#53657b; }
+  .version { font-size:10px; color:#657184; margin-top:2px; }
+  .secondary:disabled { opacity:.55; cursor:not-allowed; }
+  .rate span:first-child { color: #647184; }
+  .rate strong { font-size:12px; font-variant-numeric: tabular-nums; }
+  .switch-line { display: flex; align-items: center; justify-content:space-between; gap:10px; }
+  .switch-copy { min-width:0; }
+  .switch-heading { font-size: 13px; font-weight: 700; }
+  #modeText { font-size: 11.5px; color:#6c7889; line-height:1.35; margin-top:5px; }
+  #toggle { flex:0 0 auto; display:flex; width:48px; height:28px; align-items:center; padding:3px; border:0; border-radius:999px; background:#cbd3df; cursor:pointer; transition: background .15s; }
+  #toggle[aria-checked="true"] { background:#196bd5; }
+  #toggle .thumb { width:22px; height:22px; background:white; border-radius:50%; box-shadow: 0 1px 3px #28354644; transition:transform .15s; }
+  #toggle[aria-checked="true"] .thumb { transform:translateX(20px); }
+  #toggle:focus-visible { outline:3px solid #88bbff; outline-offset:3px; }
+  #toggle:disabled { opacity:.55; cursor:not-allowed; }
+  #toggle.busy:disabled { cursor:wait; }
+  .notice { font-size:11.5px; color:#77521a; background:#fff3dc; border-left:3px solid #d69b38; padding:8px 10px; border-radius:7px; margin:9px 0 0; line-height:1.4; }
+  .notice[hidden] { display:none; }
+  .desktop { display:flex; align-items:center; justify-content:space-between; gap:9px; }
+  .desktop-name { display:flex; align-items:center; gap:8px; color:#647184; font-size:12px; }
+  .desktop-status { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:650; }
+  .desktop-status::before { content:""; display:block; background:#b0bac7; width:7px; height:7px; border-radius:50%; }
+  .desktop-status.online { color:#217b4e; }
+  .desktop-status.online::before { background:#29a36d; }
+  .desktop-status.offline { color:#9b5921; }
+  .desktop-status.offline::before { background:#c98b36; }
+  #errorMessage { display:none; font-size:11.5px; color:#a4333d; line-height:1.4; margin:12px 0 0; padding:9px 11px; border-radius:8px; background:#fff1f1; }
+  .edit-label { font-size: 12px; color: #657184; font-weight: 600; margin: 18px 0 8px; }
+  .cap-row { display:flex; align-items:stretch; gap:7px; }
+  #limitValue { flex:1; width:0; min-width:0; }
+  #limitUnit { flex:0 0 90px; }
+  #limitValue, #limitUnit { font:inherit; font-size:13px; padding:9px 10px; background:white; border:1px solid #d7dfe8; border-radius:8px; color:#253448; }
+  #limitValue:focus, #limitUnit:focus { outline:2px solid #9ac8ff; border-color:#529bed; }
+  #applyLimit { background:#1767d2; border:0; color:white; font-weight:650; padding:0 12px; border-radius:8px; cursor:pointer; }
+  #applyLimit:disabled { background:#e7ebf1; color:#95a2b4; cursor:default; }
+  #retry { display:block; margin-top:10px; padding:7px 12px; font:inherit; background:#f0f5fd; border:1px solid #cee0f8; color:#1767d2; border-radius:7px; cursor:pointer; }
+  #retry[hidden] { display:none; }
+  .stats { display:flex; align-items:center; justify-content:space-between; margin-top:8px; color:#69778a; font-size:11.5px; }
+  .stats strong { color:#283546; }
+  .secondary { margin-top:10px; padding:7px 10px; background:white; border:1px solid #d7dfe8; border-radius:7px; color:#1767d2; cursor:pointer; font:inherit; }
+  #consentPanel { background:#f6f8fb; padding:10px; border-radius:8px; line-height:1.4; margin-top:10px;}
+  #consentPanel p {margin:0 0 7px;}
+  #consentPanel label {display:flex; gap:5px;align-items:center;}
+  dialog { width:calc(100% - 24px); border:1px solid #d7dfe8; border-radius:12px; padding:16px; color:#1d2735; box-shadow:0 12px 45px #172b4655; }
+  dialog::backdrop { background:#172b4670; }
+  dialog h2 {font-size:16px;margin:0 0 10px;}
+  dialog p {line-height:1.45;}
+  dialog .actions {display:flex;justify-content:flex-end;gap:8px;}
+  dialog button {padding:8px 12px;border:1px solid #d7dfe8;border-radius:7px;background:white;color:#27364a;cursor:pointer;}
+  dialog #confirmAttach {background:#1767d2;color:white;border-color:#1767d2;}
+  #routingControl[hidden] {display:none;}
+  .help { font-size: 11px; color:#53657b; margin:14px 0 0; line-height:1.35; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="icons/icon32.png" width="26" height="26" alt="">
+      <div><h1>Speed Limiter</h1><div class="version">v1.0.6</div></div>
+    </div>
+    <span id="statusBadge" class="badge paused">Checking</span>
+  </header>
+  <div class="divider"></div>
+  <main>
+    <div id="capLabel" class="metric-label">Saved speed limit</div>
+    <div id="currentCap" class="metric">—</div>
+    <div class="metric-note">Shared cap for proxied Chrome traffic</div>
+    <div class="rate"><span>Live downstream traffic</span><strong id="liveSpeed">—</strong></div>
+    <div class="stats"><span>Active connections</span><strong id="connections">—</strong></div>
+    <div class="connection-row"><strong>VPN compatibility</strong><span id="vpnStatus">Checking…</span></div>
+    <p id="vpnNote" class="vpn-note">Compatibility setting for the local proxy, not a VPN connection indicator.</p>
+    <div class="edit-label"><label for="limitValue">Set download speed</label></div>
+    <div class="cap-row">
+      <input id="limitValue" inputmode="decimal" type="text" value="1" maxlength="24" aria-label="Speed amount" spellcheck="false">
+      <select id="limitUnit" aria-label="Speed units">
+        <option>KB/s</option><option selected>MB/s</option><option>GB/s</option><option>Mbps</option>
+      </select>
+      <button id="applyLimit" type="button" disabled>Apply</button>
+    </div>
+    <p class="vpn-note">KB, MB and GB use binary multiples; Mbps is decimal.</p>
+    <div class="divider"></div>
+    <div class="switch-line">
+      <div class="switch-copy">
+        <div class="switch-heading" id="switchLabel">Bandwidth limiting</div>
+        <div id="modeText">Checking connection…</div>
+      </div>
+      <button id="toggle" type="button" disabled role="switch" aria-checked="false" aria-labelledby="switchLabel" aria-describedby="modeText" title="Toggle Chrome bandwidth limiting">
+        <span class="thumb"></span>
+      </button>
+    </div>
+    <p class="notice" id="consentWarning" hidden>To enable limiting, tick the consent checkbox below first.</p>
+    <p class="notice" id="existingWarning" hidden>Connections opened before the proxy connected may bypass it. Restart affected downloads once, with the companion connected.</p>
+    <div class="divider"></div>
+    <div class="desktop">
+      <div class="desktop-name">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 21h8m-4-3v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Background engine
+      </div>
+      <div id="engineStatus" class="desktop-status">Checking</div>
+    </div>
+    <div id="errorMessage" role="alert"></div>
+    <button id="routingControl" type="button" class="secondary" hidden>Disconnect proxy</button>
+    <button id="checkCompanion" type="button" class="secondary">Check Windows companion</button>
+    <div id="consentPanel" hidden><p><strong>Before enabling</strong></p><p>Once connected, Chrome routes HTTP and encrypted HTTPS connections through a local companion even when bandwidth limiting is OFF. Use Disconnect proxy to restore prior proxy settings. Website addresses and network traffic are processed on this PC only. No browsing logs, accounts or telemetry. HTTPS is not decrypted. Do not use with a required corporate proxy or VPN unless compatibility has been verified.</p><label><input type="checkbox" id="consent"> I understand and want to connect the local proxy.</label></div>
+    <p id="diagnostics" class="help" hidden></p><p id="checkResult" role="status" class="help"></p><p class="help"><a href="setup.html" target="_blank" rel="noopener">Installation &amp; troubleshooting</a></p>
+    <button id="retry" type="button" hidden>Retry connection</button>
+    <p class="help">Windows companion required. OFF removes the cap but keeps the local proxy connected. Disconnect proxy restores prior settings and stops the engine. Some traffic can bypass the proxy. This is not a VPN or firewall.</p>
+  </main>
+  <dialog id="attachDialog" aria-labelledby="attachHeading"><h2 id="attachHeading">Connect local proxy?</h2><p>Existing direct connections and downloads may bypass the proxy until restarted. Once connected, switching the cap ON or OFF does not require reconnecting proxied downloads.</p><p>Use Disconnect proxy to completely stop the companion and restore prior proxy settings.</p><p><label><input type="checkbox" id="vpnCompat"> <strong>VPN compatibility mode (optional)</strong></label></p><p class="help">Only enable for a trusted VPN or DNS filter that uses synthetic addresses. Allows DNS-resolved web destinations in 198.18.0.0/15 and the specific NordVPN Google address 192.0.0.88 for google.com and its subdomains. Other private/reserved destinations stay blocked. No DNS or VPN settings are changed. Disconnect and reconnect to change this option.</p><div class="actions"><button id="cancelAttach" type="button">Cancel</button><button id="confirmAttach" type="button">OK, connect</button></div></dialog>
+  <script src="popup.js"></script>
+</body>
+</html>
