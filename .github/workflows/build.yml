@@ -1,0 +1,95 @@
+name: Build and test Speed Limiter
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Automated tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+          cache: false
+
+      - name: Test companion
+        working-directory: host
+        env:
+          GO111MODULE: 'off'
+        run: |
+          go test -v
+          go build -o /tmp/speed-limiter-host .
+
+      - name: Test native messaging
+        run: python3 tests/test_host.py /tmp/speed-limiter-host
+
+      - name: Test extension
+        run: node tests/test_extension.js
+
+      - name: Test popup
+        run: node tests/test_popup.js
+
+  build:
+    name: Build Windows x64 installer
+    needs: test
+    runs-on: windows-2025
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+          cache: false
+
+      - name: Check build tools
+        shell: pwsh
+        run: |
+          go version
+          clang --version
+
+      - name: Build installer
+        shell: pwsh
+        run: ./Build-Windows.ps1
+
+      - name: Generate release checksums
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash dist/SpeedLimiter-Setup.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  SpeedLimiter-Setup.exe" | Set-Content dist/SHA256SUMS.txt -Encoding ascii
+          @(
+            "Source commit: $env:GITHUB_SHA"
+            "Signing status: Unsigned"
+            (go version)
+            (clang --version)
+          ) | Set-Content dist/BUILD-INFO.txt
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: SpeedLimiter-Windows-x64
+          path: |
+            dist/SpeedLimiter-Setup.exe
+            dist/SHA256SUMS.txt
+            dist/BUILD-INFO.txt
+          if-no-files-found: error
+          retention-days: 30
