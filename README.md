@@ -13,7 +13,7 @@ Both components are required. Follow the extension's setup instructions, close C
 
 The Windows companion installer is unsigned. Keep Windows security protections enabled; optional checksum verification instructions are available on the official website.
 
-**Source status:** The extension source currently in this repository is v1.0.6.1; the published extension is v1.0.6.3. The newer extension source still needs to be synchronized. The companion remains v1.0.6.
+**Source status:** The extension source in this repository matches the published Chrome Web Store package v1.0.6.3. The Windows companion remains v1.0.6.
 
 ## Features
 

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Speed Limiter for Google Chrome™",
-  "version": "1.0.6.1",
-  "description": "Set a shared download bandwidth limit for Google Chrome™. Free Windows companion required; no accounts or tracking.",
+  "name": "Speed Limiter for Google Chrome\u2122",
+  "version": "1.0.6.3",
+  "description": "Set a shared download bandwidth limit for Google Chrome\u2122. Free Windows companion required; no accounts or tracking.",
   "permissions": [
     "proxy",
     "storage",
