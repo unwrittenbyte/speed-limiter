@@ -4,7 +4,16 @@ A configurable, shared downstream bandwidth limiter for Google Chrome on Windows
 
 Speed Limiter uses a local, authenticated proxy and a Chrome extension to pace eligible HTTP and encrypted HTTPS traffic. It is free software, with no accounts, subscriptions or developer-operated traffic relay.
 
-**Release status:** Source for version 1.0.6, prepared for production integration. The Chrome Web Store listing and signed companion distribution are not yet available. Do not treat a locally compiled installer as a published or signed release.
+## Download and installation
+
+- **[Add to Chrome](https://chromewebstore.google.com/detail/speed-limiter-for-google/agbejnpaacdhklaocalpballabcibmgm)** — extension v1.0.6.3.
+- **[Download and setup guide](https://unwrittenbyte.com/speed-limiter.html#download)** — free Windows companion v1.0.6.
+
+Both components are required. Follow the extension's setup instructions, close Chrome completely before running the companion installer, and reopen Chrome afterward.
+
+The Windows companion installer is unsigned. Keep Windows security protections enabled; optional checksum verification instructions are available on the official website.
+
+**Source status:** The extension source currently in this repository is v1.0.6.1; the published extension is v1.0.6.3. The newer extension source still needs to be synchronized. The companion remains v1.0.6.
 
 ## Features
 
